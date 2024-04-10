@@ -1,0 +1,16 @@
+header {
+  background-color: pink;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-size: 1.5em;
+  color: Blue;
+}
+a:link { text-decoration: none; }
+a:visited { text-decoration: none; }
+a:hover { text-decoration: none; }
+a:active { text-decoration: none; }
+a {
+  color: green;
+  font-weight: bold;
+}

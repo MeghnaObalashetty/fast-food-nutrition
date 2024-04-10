@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="header.css">
+    <title>Fast Food Nutrition</title>
+    <style>
+        .zoom {
+            padding: 30px;
+            transition: transform .2s;
+            width: 170px;
+            height: 170px;
+            margin: 0 auto;
+        }
+        
+        .zoom:hover {
+            -ms-transform: scale(1.5);
+            -webkit-transform: scale(1.5);
+            transform: scale(1.5);
+        }
+        
+        body {
+            background-image: url('background-image.jpeg');
+            background-size: 100%;
+        }
+        /* Dropdown container */
+        
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        /* Dropdown button */
+        
+        .dropdown button {
+            background-color: #e7e7e7;
+            color: black;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+        /* Dropdown content (hidden by default) */
+        
+        .dropdown-content {
+            display: none;
+            position: relative;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+        /* Dropdown content links */
+        
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        /* Show the dropdown menu on hover */
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        h1 {
+            color: black;
+            text-align: center;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        .flex1 {
+            display: flex;
+            align-items: center;
+            align-content: center;
+            justify-content: space-around;
+        }
+        
+        .row1 {
+            display: flex;
+            align-items: center;
+            align-content: center;
+            justify-content: space-around;
+        }
+        
+        a:link {
+            text-decoration: none;
+        }
+        
+        a:visited {
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: none;
+        }
+        
+        a:active {
+            text-decoration: none;
+        }
+        
+        a {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+    <base target="_blank">
+</head>
+<header>
+    <div><b><p>Fast Food Nutrition</p></b></div>
+    <div><a href="homepage.html">Home</a></div>
+    <div><a href="Fast food Nutrition documentation.pdf">Documentation</a></div>
+    <div><a href="https://www.kaggle.com/datasets/ulrikthygepedersen/fastfood-nutrition">Data Set</a></div>
+    <div><a href="aboutus.html">About Us</a></div>
+</header>
+
+<body>
+    <h1>Want to know More About Fast Food Nutrition?</h1>
+    <p>
+        <div>
+            <a href="mcd.html">
+                <img class="zoom" src="logopng/mcdpng.png " alt="mcd " width="150 " height="150 ">
+            </a>
+            <a href="chik-fil-a.html">
+                <img class="zoom" src="logopng/cfa.png " alt="chik-fil-a " width="150 " height="150 ">
+            </a>
+            <a href="bk.html">
+                <img class="zoom" src="logopng/bk.png" alt="burgerking " width="150 " height="150 ">
+            </a>
+            <a href="sonic.html ">
+                <img class="zoom" src="logopng/sonic.png" alt="Sonic " width="150 " height="150 ">
+            </a>
+            <a href="arbys.html ">
+                <img class="zoom" src="logopng/air.png" alt="Arbys " width="150 " height="150 ">
+            </a>
+            <a href="dq.html ">
+                <img class="zoom" src="logopng/dq.png" alt="Dairy Queen " width="150 " height="150 ">
+            </a>
+            <a href="subway.html ">
+                <img class="zoom" src="logopng/sub.png" alt="Subway " width="150 " height="150 ">
+            </a>
+            <a href="taco.html ">
+                <img class="zoom" src="logopng/taco.png" alt="Taco Bell " width="150 " height="150 ">
+            </a>
+        </div>
+        <div class="dropdown" style="background-color: pink; width: 100%;">
+            <h1>Want to compare a food item across restaurants and choose correct option for you?
+                <button>
+          <a style="text-decoration: none;" href="comparefood.html">Check Here</a>
+        </button>
+            </h1>
+        </div>
+        <div class="dropdown" style="background-color: pink; width: 100%;">
+            <h1>Want to know options available less than 200 calories?
+                <button>
+          <a style="text-decoration: none;" href="healthyfood.html">Click Here</a>
+        </button>
+            </h1>
+        </div>
+        <div class="dropdown" style="background-color: pink; width: 100%;">
+            <h1>Want to know top 20 protein rich food across restaurant?
+                <button>
+          <a style="text-decoration: none;" href="proteinfood.html">Click Here</a>
+        </button>
+            </h1>
+        </div>
+    </p>
+</body>
+
+</html>

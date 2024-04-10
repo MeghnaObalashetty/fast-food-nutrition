@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Protein Bar Example</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <link rel="stylesheet" href="header.css">
+</head>
+<style>
+    /* Define CSS styles for the plot */
+    
+    .brush .extent {
+        fill-opacity: .3;
+        stroke: grey;
+        shape-rendering: crispEdges;
+    }
+    
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: red;
+        shape-rendering: crispEdges;
+    }
+    
+    .axis text {
+        text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+        cursor: move;
+        font-family: sans-serif;
+        font-size: 11px;
+    }
+    
+    .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 1px;
+    }
+    
+    .tooltip {
+        position: absolute;
+        z-index: 999;
+        padding: 10px;
+        background-color: white;
+        border: 1px solid black;
+        opacity: 0;
+    }
+    
+    h1 {
+        text-align: center;
+        font-style: italic;
+    }
+    
+    body {
+        background-image: url(background-image.jpeg);
+        background-size: 100%;
+    }
+</style>
+<header>
+    <div><b><p>Fast Food Nutrition</p></b></div>
+    <div><a href="homepage.html">Home</a></div>
+    <div><a href="Fast food Nutrition documentation.pdf">Documentation</a></div>
+    <div><a href="https://www.kaggle.com/datasets/ulrikthygepedersen/fastfood-nutrition">Data Set</a></div>
+    <div><a href="aboutus.html">About Us</a></div>
+</header>
+
+<body>
+    <h1> Food Nutrition Bar Chart with top 20 protein rich food across restaurant</h1>
+    <svg id="svgArea1"></svg>
+    <div class="tooltip"></div>
+    <script>
+        // Define the dimensions and margins of the chart
+        var margin = {
+                top: 30,
+                right: 30,
+                bottom: 30,
+                left: 60
+            },
+            width = 1000 - margin.left - margin.right,
+            height = 600 - margin.top - margin.bottom;
+
+        // Tooltip
+        const tooltip = d3.select(".tooltip");
+        d3.csv("fastfood.csv").then(function(data) {
+
+            // filter the top 20 highest protein food items
+            data = data.filter(function(d) {
+                return d.protein === d.protein;
+            });
+            data.sort(function(a, b) {
+                return b.protein - a.protein;
+            });
+            data = data.slice(0, 20);
+
+            // Append the svg object to the body of the page
+            var svg = d3.select("#svgArea1")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom + 300)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // X axis
+            var x = d3.scaleBand()
+                .range([0, width])
+                .domain(data.map(function(d) {
+                    return d.item
+
+                }))
+                .padding(0.1);
+
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x)).selectAll("text")
+                .attr("y", 0)
+                .attr("x", 9)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(90)")
+                .style("text-anchor", "start");
+
+
+            // Y axis
+            var y = d3.scaleLinear()
+                .domain([0, d3.max(data, function(d) {
+                    return +d.protein;
+                })])
+                .range([height, 0]);
+
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Bars
+            svg.selectAll("mybar")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("x", function(d) {
+                    return x(d.item);
+                })
+                .attr("y", function(d) {
+                    return y(d.protein);
+                })
+                .attr("width", x.bandwidth())
+                .attr("height", function(d) {
+                    return height - y(d.protein);
+                })
+                .attr("fill", "#69b3a2")
+                .on("mousemove", (event, d) => {
+                    tooltip
+                        .html(`${d.restaurant}: ${d.item}: ${d.protein}`)
+                        .style("opacity", 1)
+                        .style("left", `${event.pageX + 10}px`)
+                        .style("top", `${event.pageY - 25}px`);
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+
+        });
+    </script>
+
+</body>
+
+</html>

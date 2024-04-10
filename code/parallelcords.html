@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Parallel Coordinates Plot</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<style>
+    /* Define CSS styles for the plot */
+    
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: red;
+        shape-rendering: crispEdges;
+    }
+    
+    .axis text {
+        font-family: sans-serif;
+        font-size: 11px;
+    }
+    
+    .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 2px;
+    }
+</style>
+
+<body>
+    <svg id="chart"></svg>
+
+    <script>
+        // Load the data from the CSV file
+        d3.csv("mcdonalds.csv").then(function(data) {
+            // Set up the dimensions and margins of the plot
+            var margin = {
+                    top: 30,
+                    right: 10,
+                    bottom: 10,
+                    left: 50
+                },
+                width = 2400 - margin.left - margin.right,
+                height = 800 - margin.top - margin.bottom;
+
+            // Create the SVG element
+            var svg = d3.select("#chart")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            // Extract the column names
+            var dimensions = Object.keys(data[0]).filter(function(d) {
+                return d != "restaurant";
+            });
+
+            // Scale for each dimension
+            var y = {};
+            dimensions.forEach(function(d) {
+                y[d] = d3.scaleLinear()
+                    .domain(d3.extent(data, function(p) {
+                        return +p[d];
+                    }))
+                    .range([height, 0]);
+            });
+
+            // Create a line generator for each dimension
+            var line = d3.line()
+                .defined(function(d) {
+                    return !isNaN(d[1]);
+                })
+                .x(function(d) {
+                    return x(d[0]);
+                })
+                .y(function(d) {
+                    return y[d[0]](d[1]);
+                });
+
+            // Create the x scale
+            var x = d3.scalePoint()
+                .range([0, width])
+                .domain(dimensions);
+
+            // Add the lines
+            svg.selectAll("path")
+                .data(data)
+                .enter().append("path")
+                .attr("class", "line")
+                .attr("d", function(d) {
+                    return line(dimensions.map(function(p) {
+                        return [p, +d[p]];
+                    }));
+                });
+
+            // Add the axes
+            svg.selectAll(".axis")
+                .data(dimensions)
+                .enter().append("g")
+                .attr("class", "axis")
+                .attr("transform", function(d) {
+                    return "translate(" + x(d) + ")";
+                })
+                .each(function(d) {
+                    d3.select(this).call(d3.axisLeft().scale(y[d]));
+                })
+                .append("text")
+                .attr("class", "title")
+                .attr("text-anchor", "start")
+                .text(function(d) {
+                    return d;
+                });
+        });
+    </script>
+</body>
+
+</html>

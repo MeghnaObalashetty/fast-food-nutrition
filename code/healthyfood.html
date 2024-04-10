@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Food Nutrition Stacked Bar Chart</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <link rel="stylesheet" href="header.css">
+</head>
+<style>
+    .tooltip {
+        position: absolute;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        padding: 8px;
+        pointer-events: none;
+    }
+    
+    h1 {
+        text-align: center;
+        font-style: italic;
+    }
+    
+    body {
+        background-image: url(background-image.jpeg);
+        background-size: 100%;
+    }
+</style>
+<header>
+    <div><b><p>Fast Food Nutrition</p></b></div>
+    <div><a href="homepage.html">Home</a></div>
+    <div><a href="Fast food Nutrition documentation.pdf">Documentation</a></div>
+    <div><a href="https://www.kaggle.com/datasets/ulrikthygepedersen/fastfood-nutrition">Data Set</a></div>
+    <div><a href="aboutus.html">About Us</a></div>
+</header>
+
+<body>
+    <h1> Food Nutrition Stacked Bar Chart Showing items below 200 calories</h1>
+    <div id="chart"></div>
+
+    <script>
+        // Step 1: Load the CSV data
+        d3.csv("fastfood.csv").then(data => {
+
+            var margin = {
+                    top: 30,
+                    right: 30,
+                    bottom: 40,
+                    left: 60
+                },
+                width = 2400 - margin.left - margin.right,
+                height = 800 - margin.top - margin.bottom;
+
+            // Step 2: Filter the data based on calories less than 200
+            const filteredData = data.filter(d => +d.calories < 200);
+            var restaurants = filteredData.map(function(d) {
+                return d.restaurant;
+            });
+            // Step 3: Prepare data for stacked bar chart
+            const stackedData = d3.stack()
+                .keys(["calories", "total_carb", "protein"])
+                .value((d, key) => +d[key])
+                (filteredData);
+
+            // Step 4: Create a stacked bar chart
+            const svg = d3.select("#chart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom + 100)
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            const xScale = d3.scaleBand()
+                .range([50, width])
+                .domain(filteredData.map(d => d.item))
+                .padding(0.1);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(stackedData, d => d3.max(d, d => d[1]))])
+                .range([height, 0]);
+
+            const color = d3.scaleOrdinal()
+                .domain(["calories", "total_carb", "protein"])
+                .range(["#ffcc00", "#ff6666", "#66cc66"]);
+
+            svg.selectAll("g")
+                .data(stackedData)
+                .enter()
+                .append("g")
+                .attr("fill", d => color(d.key))
+                .selectAll("rect")
+                .data(d => d)
+                .enter()
+                .append("rect")
+                .attr("x", d => xScale(d.data.item))
+                .attr("y", d => yScale(d[1]))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => yScale(d[0]) - yScale(d[1]))
+                .on("mouseover", showTooltip)
+                .on("mouseout", hideTooltip);
+
+            svg.append("g")
+                .attr("transform", "translate(0, 730)")
+                .call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", "-.15em")
+                .attr("transform", "rotate(-90)");
+
+            svg.append("g")
+                .attr("transform", "translate(50, 0)")
+                .call(d3.axisLeft(yScale));
+
+            const tooltip = d3.select("#chart")
+                .append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            function showTooltip(event, d) {
+                const key = d3.select(this.parentNode).datum().key;
+                const value = d.data[key];
+                tooltip.html(`${d.data.restaurant}: <strong>${key}: </strong>${value}`)
+                    .style("left", event.pageX + 10 + "px")
+                    .style("top", event.pageY - 10 + "px")
+                    .style("opacity", 0.9);
+            }
+
+            function hideTooltip() {
+                tooltip.style("opacity", 0);
+            }
+
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Parallel Coordinate Visualization For Sonic</title>
+    <link rel="stylesheet" href="header.css">
+</head>
+<style>
+    .bg path {
+        fill: none;
+        stroke: lightblue;
+        shape-rendering: auto;
+    }
+    
+    .fg path {
+        fill: none;
+        stroke: rgb(224, 96, 224);
+    }
+    
+    .brush .extent {
+        fill-opacity: .3;
+        stroke: #fff;
+        shape-rendering: auto;
+    }
+    
+    .axis line,
+    .axis path {
+        fill: none;
+        stroke: #000;
+        shape-rendering: auto;
+    }
+    
+    .axis text {
+        cursor: move;
+    }
+</style>
+<header>
+    <div><b><p>Fast Food Nutrition</p></b></div>
+    <div><a href="homepage.html">Home</a></div>
+    <div><a href="Fast food Nutrition documentation.pdf">Documentation</a></div>
+    <div><a href="https://www.kaggle.com/datasets/ulrikthygepedersen/fastfood-nutrition">Data Set</a></div>
+    <div><a href="aboutus.html">About Us</a></div>
+</header>
+
+<body>
+    <h1> Food Nutrition Parallel Cords for Sonic</h1>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
+    <script>
+        var margin = {
+                top: 30,
+                right: 10,
+                bottom: 10,
+                left: 10
+            },
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+        var x = d3.scale.ordinal().rangePoints([0, width], 1),
+            y = {},
+            drag = {};
+        var line = d3.svg.line(),
+            axis = d3.svg.axis().orient("left"),
+            bg,
+            fg;
+        var svg = d3.select("body").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var textarea = d3.select("body").append("textarea").attr("rows", 5).style("width", "100%");
+        d3.csv("fastfood.csv", function(error, data) {
+            data.forEach(function(d) {
+                delete d.vit_a;
+                delete d.salad;
+                delete d.calcium;
+                delete d.vit_c;
+            });
+            const targetRestaurant = "Sonic";
+            const filteredData = data.filter(d => d.restaurant === targetRestaurant);
+            x.domain(dimensions = d3.keys(filteredData[0]).filter(function(d) {
+                return d != "restaurant" && (y[d] = d3.scale.linear().domain(d3.extent(filteredData, function(p) {
+                    return +p[d];
+                })).range([height, 0]));
+            }));
+
+            function position(d) {
+                var v = drag[d];
+                return v == null ? x(d) : v;
+            }
+
+            function transition(g) {
+                return g.transition().duration(500);
+            }
+
+            function path(d) {
+                return line(dimensions.map(function(p) {
+                    return [position(p), y[p](d[p])];
+                }));
+            }
+
+            function brushstart() {
+                d3.event.sourceEvent.stopPropagation();
+            }
+
+            function brush() {
+                var actives = dimensions.filter(function(p) {
+                        return !y[p].brush.empty();
+                    }),
+                    extents = actives.map(function(p) {
+                        return y[p].brush.extent();
+                    });
+                fg.style("display", function(d) {
+                    return actives.every(function(p, i) {
+                        return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+                    }) ? null : "none";
+                });
+            }
+            bg = svg.append("g").attr("class", "bg").selectAll("path").data(filteredData).enter().append("path").attr("d", path);
+            fg = svg.append("g").attr("class", "fg").selectAll("path").data(filteredData).enter().append("path").attr("d", path).attr("title", function(d) {
+                return d.item;
+            });;
+            var tip = d3.tip().attr('class', 'd3-tip').html(function(d) {
+                return d.item;
+            }); // set the tooltip text to the item name
+            fg.call(tip);
+            fg.on('mouseover', tip.show).on('mouseout', tip.hide);
+            fg.on('mouseover', function(d) {
+                var details = "Item: " + d.item + "  " + "Calories: " + d.calories + "  " + "Cal: " + d.cal_fat + "  " + "Total Fat: " + d.total_fat + "  " + "sat_fat: " + d.sat_fat + "  " + "trans_fat: " + d.trans_fat + "  " + "Cholesterol: " + d.cholesterol + "  " + "Sodium: " + d.sodium + "  " + "total_carb: " + d.total_carb + "  " + "fiber: " + d.fiber + "  " + "Sugar: " + d.protein + "  ";
+                textarea.property("value", details);
+            });
+            // fg.on('mouseout', function(d) {
+            //   textarea.property("value", "");
+            // });
+            var g = svg.selectAll(".dimension").data(dimensions).enter().append("g").attr("class", "dimension").attr("transform", function(d) {
+                return "translate(" + x(d) + ")";
+            }).call(d3.behavior.drag().origin(function(d) {
+                return {
+                    x: x(d)
+                };
+            }).on("dragstart", function(d) {
+                drag[d] = x(d);
+                bg.attr("visibility", "hidden");
+            }).on("drag", function(d) {
+                drag[d] = Math.min(width, Math.max(0, d3.event.x));
+                fg.attr("d", path);
+                dimensions.sort(function(a, b) {
+                    return position(a) - position(b);
+                });
+                x.domain(dimensions);
+                g.attr("transform", function(d) {
+                    return "translate(" + position(d) + ")";
+                })
+            }).on("dragend", function(d) {
+                delete drag[d];
+                transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
+                transition(fg).attr("d", path);
+                bg.attr("d", path).transition().delay(500).duration(0).attr("visibility", null);
+            }));
+            g.append("g").attr("class", "axis").each(function(d) {
+                d3.select(this).call(axis.scale(y[d]));
+            }).append("text").style("text-anchor", "middle").attr("y", -9).text(function(d) {
+                return d;
+            });
+            g.append("g").attr("class", "brush").each(function(d) {
+                d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart", brushstart).on("brush", brush));
+            }).selectAll("rect").attr("x", -8).attr("width", 16);
+        });
+    </script>
+</body>
+
+</html>
